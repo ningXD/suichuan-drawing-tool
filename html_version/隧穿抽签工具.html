@@ -991,17 +991,24 @@
     </div>
 </div>
 
-<!-- 二维码弹窗（简化版，直接显示URL） -->
-<div id="qrModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
-    <div style="background-color: white; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 400px; text-align: center; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
-        <h2>填写名字链接</h2>
+<!-- 二维码弹窗（含实际二维码） -->
+<div id="qrModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); overflow: auto;">
+    <div style="background-color: white; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 400px; text-align: center; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); max-height: 80vh; overflow-y: auto;">
+        <!-- 关闭按钮（右上角） -->
+        <button id="closeQrModal" style="position: absolute; top: 10px; right: 10px; padding: 5px 10px; background-color: #f44336; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; z-index: 1001;">&times;</button>
+        
+        <h2 style="margin-top: 10px;">填写名字二维码</h2>
+        <!-- 二维码图片显示区域 -->
+        <div style="margin: 20px 0; padding: 10px; background-color: #ffffff; border: 1px solid #eee; border-radius: 5px;">
+            <img id="qrCodeImage" src="" alt="填写名字二维码" style="width: 200px; height: 200px;" />
+        </div>
+        <!-- URL显示和复制区域 -->
         <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px; word-break: break-all;">
-            <p style="margin: 0; font-size: 16px;">复制以下链接到浏览器或手机中访问：</p>
-            <p id="fillNameUrl" style="margin: 10px 0; font-weight: bold; color: #2196F3;"></p>
+            <p style="margin: 0; font-size: 14px;">或复制以下链接到浏览器中访问：</p>
+            <p id="fillNameUrl" style="margin: 10px 0; font-weight: bold; color: #2196F3; font-size: 14px;"></p>
             <button id="copyUrlBtn" style="padding: 8px 15px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">复制链接</button>
         </div>
-        <p>通过该链接可以填写名字，自动添加到教练列表</p>
-        <button id="closeQrModal" style="padding: 10px 20px; background-color: #607d8b; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">关闭</button>
+        <p style="font-size: 14px; margin: 15px 0;">扫描二维码或点击链接可以填写名字，自动添加到教练列表</p>
     </div>
 </div>
 
@@ -1013,6 +1020,7 @@
     const closeQrModal = document.getElementById('closeQrModal');
     const fillNameUrl = document.getElementById('fillNameUrl');
     const copyUrlBtn = document.getElementById('copyUrlBtn');
+    const qrCodeImage = document.getElementById('qrCodeImage'); // 新增二维码图片元素
     
     // 填写名字页面元素
     const fillNamePage = document.getElementById('fillNamePage');
@@ -1020,7 +1028,21 @@
     const submitNameBtn = document.getElementById('submitNameBtn');
     const fillNameStatus = document.getElementById('fillNameStatus');
     
-    // 生成二维码按钮点击事件（简化为显示URL）
+    // 显示弹窗时禁用背景滚动
+    function showModal() {
+        qrModal.style.display = 'block';
+        // 禁用背景滚动
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // 隐藏弹窗时恢复背景滚动
+    function hideModal() {
+        qrModal.style.display = 'none';
+        // 恢复背景滚动
+        document.body.style.overflow = 'auto';
+    }
+    
+    // 生成二维码按钮点击事件
     generateQrBtn.addEventListener('click', () => {
         // 生成填写名字页面的URL
         const currentUrl = window.location.href;
@@ -1029,19 +1051,24 @@
         // 显示URL
         fillNameUrl.textContent = url;
         
+        // 使用第三方API生成二维码（免费且无需注册）
+        // 这里使用QRCode Monkey API，它是免费的且支持直接URL生成
+        const qrCodeApi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+        
+        // 设置二维码图片源
+        qrCodeImage.src = qrCodeApi;
+        
         // 显示弹窗
-        qrModal.style.display = 'block';
+        showModal();
     });
     
-    // 关闭二维码弹窗
-    closeQrModal.addEventListener('click', () => {
-        qrModal.style.display = 'none';
-    });
+    // 关闭二维码弹窗（右上角关闭按钮）
+    closeQrModal.addEventListener('click', hideModal);
     
     // 点击弹窗外部关闭
     window.addEventListener('click', (event) => {
         if (event.target === qrModal) {
-            qrModal.style.display = 'none';
+            hideModal();
         }
     });
     
