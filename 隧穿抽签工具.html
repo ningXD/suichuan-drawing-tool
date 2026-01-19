@@ -128,17 +128,38 @@
             padding: 0;
             margin-bottom: 0;
             max-height: 200px;
+            min-height: 150px;
             overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .name-list > * {
+            width: 100%;
         }
         
         .name-item {
             background-color: #e8f5e8;
-            padding: 8px 12px;
-            margin: 5px 0;
+            padding: 6px 12px;
+            margin: 2px 0;
             border-radius: 3px;
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+        
+        .empty-container {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .empty-message {
+            text-align: center;
+            color: #999;
+            margin: 0;
         }
         
         .name-item input[type="checkbox"] {
@@ -387,6 +408,13 @@
             border-radius: 5px;
             resize: vertical;
             font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
+        
+        /* 放大placeholder字体 */
+        #importText::placeholder {
+            font-size: 16px;
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -406,11 +434,6 @@
         <!-- 返回按钮 -->
         <button id="backBtn1" class="back-btn">返回首页</button>
         <h1>更新教练</h1>
-        
-        <div class="add-name">
-            <input type="text" id="nameInput" placeholder="请输入教练名字">
-            <button id="addBtn">添加教练</button>
-        </div>
         
         <div class="name-list-container">
             <!-- 操作栏 -->
@@ -432,8 +455,8 @@
         </div>
         
         <div style="margin-top: 20px;">
-            <h3>批量导入教练</h3>
-            <textarea id="importText" placeholder="请输入教练名字，每行一个"></textarea>
+            <h3>输入名称导入教练（可批量）</h3>
+            <textarea id="importText" placeholder="请输入教练名字，每行一个，通过回车enter键换行"></textarea>
             <div class="import-export">
                 <button id="importBtn">导入教练</button>
             </div>
@@ -485,8 +508,6 @@
         let drawnNamesList = []; // 已抽名单
         
         // 获取DOM元素
-        const nameInput = document.getElementById('nameInput');
-        const addBtn = document.getElementById('addBtn');
         const nameList = document.getElementById('nameList');
         const result = document.getElementById('result');
         const drawBtn = document.getElementById('drawBtn');
@@ -511,24 +532,7 @@
         const updateCoachPage = document.getElementById('updateCoachPage');
         const drawPage = document.getElementById('drawPage');
         
-        // 添加名字函数
-        function addName() {
-            let name = nameInput.value.trim();
-            if (name) {
-                // 检查是否存在同名（包括带有序号后缀的）
-                if (hasSimilarName(name)) {
-                    if (!confirm('名单里已经有相似的名字，是否继续添加？')) {
-                        return;
-                    }
-                }
-                // 生成唯一名字
-                const uniqueName = generateUniqueName(name);
-                names.push(uniqueName);
-                updateNameList();
-                saveNames();
-                nameInput.value = '';
-            }
-        }
+
         
         // 提取基础名字（去掉序号后缀）
         function extractBaseName(name) {
@@ -598,19 +602,19 @@
         
         // 更新名字列表
         function updateNameList() {
+            const nameListElement = document.getElementById('nameList');
+            
             if (names.length === 0) {
-                nameList.innerHTML = '<p style="color: #999;">暂无教练，请先添加</p>';
+                nameListElement.innerHTML = '<div class="empty-container"><p class="empty-message">暂无教练，请先添加</p></div>';
                 return;
             }
             
-            const html = names.map((name, index) => `
+            nameListElement.innerHTML = names.map((name, index) => `
                 <div class="name-item">
                     <input type="checkbox" id="name_${index}" class="name-checkbox">
                     <label for="name_${index}">${name}</label>
                 </div>
             `).join('');
-            
-            nameList.innerHTML = html;
         }
         
         // 全选/取消全选功能
@@ -783,16 +787,8 @@
         }
         
         // 事件监听
-        addBtn.addEventListener('click', addName);
         drawBtn.addEventListener('click', startDraw);
         confirmCountBtn.addEventListener('click', confirmDrawCount);
-        
-        // 回车键添加名字
-        nameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                addName();
-            }
-        });
         
         // 回车键确认人数
         drawCountInput.addEventListener('keypress', (e) => {
