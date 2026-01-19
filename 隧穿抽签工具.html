@@ -834,24 +834,36 @@
             // 检查是否存在相似名字
             const baseNames = [...new Set(importedNames)]; // 去重
             let hasSimilar = false;
-            const similarNames = [];
+            const similarInfo = [];
             
             baseNames.forEach(baseName => {
-                if (hasSimilarName(baseName)) {
+                // 检查现有列表中是否有相似的基础名字
+                const existingSimilarCount = names.filter(existingName => {
+                    return extractBaseName(existingName) === extractBaseName(baseName);
+                }).length;
+                
+                if (existingSimilarCount > 0) {
                     hasSimilar = true;
-                    similarNames.push(baseName);
+                    // 计算导入的该基础名字数量
+                    const importCount = importedNames.filter(n => {
+                        return extractBaseName(n) === extractBaseName(baseName);
+                    }).length;
+                    similarInfo.push({
+                        baseName: baseName,
+                        existingCount: existingSimilarCount,
+                        importCount: importCount
+                    });
                 }
             });
             
             // 如果存在相似名字，显示确认对话框
             if (hasSimilar) {
-                // 计算每个相似名字的实际导入数量
-                const similarNameCounts = similarNames.map(name => {
-                    const count = importedNames.filter(n => n === name).length;
-                    return `${name}(${count}个)`;
+                // 生成相似名字统计信息
+                const similarNameCounts = similarInfo.map(info => {
+                    return `${info.baseName}(现有${info.existingCount}个，导入${info.importCount}个)`;
                 });
                 
-                if (!confirm(`检测到 ${similarNames.length} 种相似名字，共 ${importedNames.length} 个名字：${similarNameCounts.join('、')}，是否继续导入？`)) {
+                if (!confirm(`检测到 ${similarInfo.length} 种相似名字：${similarNameCounts.join('、')}，是否继续导入？`)) {
                     return;
                 }
             }
