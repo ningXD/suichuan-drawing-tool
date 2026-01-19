@@ -1,0 +1,77 @@
+<!-- 新更新教练页面 -->
+<view class="container">
+  <h1>更新教练</h1>
+  
+  <!-- 生成二维码按钮 -->
+  <button class="btn btn-gray" bindtap="generateQRCode" style="position: absolute; top: 15px; right: 15px; z-index: 100;">生成二维码</button>
+  
+  <!-- 名字列表容器 -->
+  <view class="list-container">
+    <!-- 操作栏 -->
+    <view class="list-header">
+      <view class="select-all">
+        <checkbox bindtap="toggleSelectAll" checked="{{selectAll}}"></checkbox>
+        <text>全选</text>
+      </view>
+      <button class="btn btn-danger" bindtap="batchDeleteNames" size="mini">删除</button>
+    </view>
+    
+    <!-- 名字列表 -->
+    <view class="name-list" style="max-height: 300px; overflow-y: auto;">
+      <view wx:if="{{names.length === 0}}" class="empty-message">
+        暂无教练，请先添加
+      </view>
+      <view wx:else>
+        <view wx:for="{{names}}" wx:key="index" class="list-item">
+          <checkbox value="{{index}}" checked="{{selectedNames.indexOf(index) > -1}}" bindtap="toggleSelectName"></checkbox>
+          <text>{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 批量导入教练 -->
+  <view style="margin-top: 20px;">
+    <h3>输入名称导入教练（可批量）</h3>
+    <textarea 
+      class="textarea" 
+      placeholder="请输入教练名字，每行一个，通过回车enter键换行" 
+      value="{{importText}}"
+      bindinput="onImportTextChange"
+      style="min-height: 150px; font-size: 16px;"
+    ></textarea>
+    <view class="batch-operations">
+      <button class="btn btn-primary" bindtap="importNames">导入教练</button>
+    </view>
+  </view>
+  
+  <!-- 二维码弹窗 -->
+  <view wx:if="{{showQRModal}}" class="modal">
+    <view class="modal-content">
+      <h3>填写名字二维码</h3>
+      <view style="margin: 20px 0;">
+        <image src="{{qrCodePath}}" mode="widthFix" style="width: 200px; height: 200px;"></image>
+      </view>
+      <text>扫描二维码填写名字</text>
+      <button class="btn btn-gray" bindtap="closeQRModal" style="margin-top: 20px;">关闭</button>
+    </view>
+  </view>
+  
+  <!-- 密码弹窗 -->
+  <view wx:if="{{showPasswordModal}}" class="modal">
+    <view class="modal-content">
+      <h3>请输入密码</h3>
+      <input 
+        type="password" 
+        placeholder="请输入删除密码" 
+        value="{{passwordInput}}" 
+        bindinput="onPasswordInputChange" 
+        class="modal-input"
+      />
+      <view style="display: flex; gap: 10px; justify-content: center;">
+        <button class="btn btn-primary" bindtap="confirmPassword">确定</button>
+        <button class="btn btn-gray" bindtap="cancelPassword">取消</button>
+      </view>
+    </view>
+  </view>
+</view>

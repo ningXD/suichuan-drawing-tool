@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "new_pages/new_index/new_index",
+    "new_pages/new_updateCoach/new_updateCoach",
+    "new_pages/new_fillName/new_fillName",
+    "new_pages/new_draw/new_draw"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "新隧穿抽签工具",
+    "navigationBarTextStyle": "black"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

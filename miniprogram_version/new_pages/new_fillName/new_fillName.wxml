@@ -1,0 +1,20 @@
+<!-- 新填写名字页面 -->
+<view class="container page">
+  <h1>填写你的名字</h1>
+  
+  <view style="margin-top: 50px; width: 100%; max-width: 400px;">
+    <input 
+      class="input" 
+      placeholder="请输入你的名字" 
+      value="{{name}}" 
+      bindinput="onNameInputChange" 
+      style="font-size: 20px; padding: 15px;"
+    />
+    
+    <button class="btn btn-primary" bindtap="submitName" style="width: 100%; font-size: 20px; padding: 15px;">提交</button>
+    
+    <view wx:if="{{submitted}}" class="success-message" style="text-align: center; margin-top: 30px; color: #4CAF50; font-size: 20px;">
+      名字提交成功！
+    </view>
+  </view>
+</view>
