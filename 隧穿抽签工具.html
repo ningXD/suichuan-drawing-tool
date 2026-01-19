@@ -825,10 +825,19 @@
                 return;
             }
             
-            const importedNames = text.split('\n').map(name => name.trim()).filter(name => name);
+            let importedNames = text.split('\n').map(name => name.trim()).filter(name => name);
             if (importedNames.length === 0) {
                 status.textContent = '没有有效的名字可以导入！';
                 return;
+            }
+            
+            // 检查批量输入中是否有重复名字
+            const uniqueImportedNames = [...new Set(importedNames)];
+            if (uniqueImportedNames.length < importedNames.length) {
+                const duplicateCount = importedNames.length - uniqueImportedNames.length;
+                if (!confirm(`检测到 ${duplicateCount} 个重复名字，是否继续导入所有 ${importedNames.length} 个名字？`)) {
+                    return;
+                }
             }
             
             // 检查是否存在相似名字
