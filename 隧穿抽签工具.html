@@ -212,6 +212,62 @@
             margin: 50px 0;
         }
         
+        /* 抽签人数选择区域样式 */
+        #drawCountSection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: 50px 0;
+        }
+        
+        #drawCountSection h3 {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+        
+        /* 抽签人数输入框样式 */
+        #drawCountInput {
+            width: 250px;
+            height: 50px;
+            padding: 0 20px;
+            font-size: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        /* 确认人数按钮样式 */
+        #confirmCountBtn {
+            width: 180px;
+            height: 50px;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #confirmCountBtn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 开始抽签按钮样式 */
+        #drawBtn {
+            display: block;
+            margin: 20px auto;
+            width: 220px;
+            height: 60px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
         /* 结果高亮样式 */
         .result-highlight {
             font-size: 64px;
@@ -336,9 +392,23 @@
         <h1>隧穿教练抽签工具</h1>
         
         <div class="draw-area-simple">
-            <div id="result">点击开始抽签</div>
-            <button id="drawBtn">开始抽签</button>
+            <!-- 抽签人数选择 -->
+            <div id="drawCountSection">
+                <h3>请选择本次抽签人数</h3>
+                <input type="number" id="drawCountInput" placeholder="输入人数" min="1" max="100">
+                <button id="confirmCountBtn">确认人数</button>
+            </div>
+            
+            <!-- 抽签结果显示 -->
+            <div id="result" style="display: none;">点击开始抽签</div>
+            <button id="drawBtn" style="display: none;">开始抽签</button>
             <div class="status" id="status"></div>
+            
+            <!-- 已抽取名单 -->
+            <div id="drawnList" style="margin-top: 30px; display: none;">
+                <h3>已抽取名单</h3>
+                <div id="drawnNames"></div>
+            </div>
         </div>
     </div>
 
@@ -352,6 +422,10 @@
         let whitelist = JSON.parse(localStorage.getItem('drawingWhitelist')) || [];
         let isDrawing = false;
         let drawInterval = null;
+        // 多人抽签相关变量
+        let drawCount = 1; // 本次抽签人数
+        let remainingNames = []; // 剩余可抽名单
+        let drawnNamesList = []; // 已抽名单
         
         // 获取DOM元素
         const nameInput = document.getElementById('nameInput');
@@ -363,6 +437,12 @@
         const importText = document.getElementById('importText');
         const importBtn = document.getElementById('importBtn');
         const clearBtn = document.getElementById('clearBtn');
+        // 抽签人数选择相关元素
+        const drawCountSection = document.getElementById('drawCountSection');
+        const drawCountInput = document.getElementById('drawCountInput');
+        const confirmCountBtn = document.getElementById('confirmCountBtn');
+        const drawnList = document.getElementById('drawnList');
+        const drawnNames = document.getElementById('drawnNames');
         // 页面导航元素
         const backBtn1 = document.getElementById('backBtn1');
         const backBtn2 = document.getElementById('backBtn2');
@@ -422,8 +502,14 @@
             localStorage.setItem('drawingNames', JSON.stringify(names));
         }
         
-        // 开始抽签
-        function startDraw() {
+        // 确认抽签人数
+        function confirmDrawCount() {
+            const count = parseInt(drawCountInput.value.trim());
+            if (isNaN(count) || count < 1) {
+                status.textContent = '请输入有效的抽签人数！';
+                return;
+            }
+            
             // 过滤掉白名单人员
             const availableNames = names.filter(name => !whitelist.includes(name));
             
@@ -432,11 +518,50 @@
                 return;
             }
             
-            // 当只有一个人时，提示确认
-            if (availableNames.length === 1) {
-                if (!confirm('目前可用名单里只有一个人，确定抽签吗？')) {
-                    return;
-                }
+            if (count > availableNames.length) {
+                status.textContent = `可用人数不足！最多只能抽 ${availableNames.length} 人。`;
+                return;
+            }
+            
+            // 初始化抽签状态
+            drawCount = count;
+            remainingNames = [...availableNames];
+            drawnNamesList = [];
+            
+            // 显示抽签界面
+            drawCountSection.style.display = 'none';
+            result.style.display = 'block';
+            drawBtn.style.display = 'block';
+            drawnList.style.display = 'block';
+            
+            // 重置结果显示
+            result.className = '';
+            result.textContent = '点击开始抽签';
+            updateDrawnList();
+            status.textContent = `准备抽取 ${drawCount} 人，请点击开始抽签！`;
+        }
+        
+        // 更新已抽名单显示
+        function updateDrawnList() {
+            if (drawnNamesList.length === 0) {
+                drawnNames.innerHTML = '<p style="color: #999;">暂无抽取结果</p>';
+                return;
+            }
+            
+            const html = drawnNamesList.map((name, index) => `
+                <div class="name-item" style="background-color: #e3f2fd;">
+                    <span><strong>第${index + 1}名：</strong>${name}</span>
+                </div>
+            `).join('');
+            
+            drawnNames.innerHTML = html;
+        }
+        
+        // 开始抽签
+        function startDraw() {
+            if (remainingNames.length === 0) {
+                status.textContent = '抽签已完成！';
+                return;
             }
             
             if (isDrawing) return;
@@ -444,11 +569,10 @@
             // 重置结果样式和显示
             result.className = '';
             result.innerHTML = '';
-            drawBtn.className = '';
             
             isDrawing = true;
             drawBtn.disabled = true;
-            status.textContent = '正在抽签...';
+            status.textContent = `正在抽取第 ${drawnNamesList.length + 1}/${drawCount} 人...`;
             
             let count = 0;
             const totalCount = 50; // 总共切换50次
@@ -456,25 +580,43 @@
             
             // 开始快速切换名字
             drawInterval = setInterval(() => {
-                const randomIndex = Math.floor(Math.random() * availableNames.length);
-                result.textContent = availableNames[randomIndex];
+                const randomIndex = Math.floor(Math.random() * remainingNames.length);
+                result.textContent = remainingNames[randomIndex];
                 count++;
                 
                 if (count >= totalCount) {
                     clearInterval(drawInterval);
                     isDrawing = false;
                     
-                    // 隐藏开始按钮
-                    drawBtn.className = 'hidden';
+                    // 获取抽取结果
+                    const drawnName = result.textContent;
+                    
+                    // 添加到已抽名单
+                    drawnNamesList.push(drawnName);
+                    
+                    // 从剩余名单中移除
+                    const index = remainingNames.indexOf(drawnName);
+                    if (index > -1) {
+                        remainingNames.splice(index, 1);
+                    }
                     
                     // 高亮显示结果
                     result.className = 'result-highlight';
                     
                     // 添加emoji特效
-                    const resultText = result.textContent;
-                    result.innerHTML = `${resultText}<br><span style="font-size: 48px; margin-top: 20px; display: block;">🎉🌸🎊</span>`;
+                    result.innerHTML = `${drawnName}<br><span style="font-size: 48px; margin-top: 20px; display: block;">🎉🌸🎊</span>`;
                     
-                    status.textContent = '抽签完成！';
+                    // 更新已抽名单
+                    updateDrawnList();
+                    
+                    // 检查是否抽取完成
+                    if (drawnNamesList.length >= drawCount) {
+                        status.textContent = `抽签完成！共抽取 ${drawCount} 人。`;
+                        drawBtn.style.display = 'none';
+                    } else {
+                        status.textContent = `第 ${drawnNamesList.length}/${drawCount} 人已抽取，点击继续抽取下一人！`;
+                        drawBtn.disabled = false;
+                    }
                 }
             }, intervalTime);
         }
@@ -482,11 +624,19 @@
         // 事件监听
         addBtn.addEventListener('click', addName);
         drawBtn.addEventListener('click', startDraw);
+        confirmCountBtn.addEventListener('click', confirmDrawCount);
         
         // 回车键添加名字
         nameInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 addName();
+            }
+        });
+        
+        // 回车键确认人数
+        drawCountInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                confirmDrawCount();
             }
         });
         
@@ -567,14 +717,25 @@
             // 清空状态信息
             status.textContent = '';
             
-            // 在抽签页面隐藏状态信息容器
+            // 在抽签页面重置状态
             if (page === drawPage) {
-                status.style.display = 'none';
-                // 重置抽签状态
-                drawBtn.className = '';
-                drawBtn.disabled = false;
-                result.className = '';
-                result.textContent = '点击开始抽签';
+                status.style.display = 'block';
+                // 重置所有抽签相关元素
+                drawCountSection.style.display = 'block';
+                result.style.display = 'none';
+                drawBtn.style.display = 'none';
+                drawnList.style.display = 'none';
+                drawCountInput.value = '';
+                
+                // 重置抽签状态变量
+                drawCount = 1;
+                remainingNames = [];
+                drawnNamesList = [];
+                isDrawing = false;
+                if (drawInterval) {
+                    clearInterval(drawInterval);
+                    drawInterval = null;
+                }
             } else {
                 status.style.display = 'block';
             }
