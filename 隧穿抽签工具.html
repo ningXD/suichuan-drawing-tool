@@ -376,14 +376,7 @@
             background-color: #7b1fa2;
         }
         
-        #clearBtn {
-            background-color: #607d8b;
-            color: white;
-        }
-        
-        #clearBtn:hover {
-            background-color: #455a64;
-        }
+
         
         #importText {
             width: 100%;
@@ -443,7 +436,6 @@
             <textarea id="importText" placeholder="请输入教练名字，每行一个"></textarea>
             <div class="import-export">
                 <button id="importBtn">导入教练</button>
-                <button id="clearBtn">清空教练</button>
             </div>
         </div>
     </div>
@@ -501,7 +493,6 @@
         const status = document.getElementById('status');
         const importText = document.getElementById('importText');
         const importBtn = document.getElementById('importBtn');
-        const clearBtn = document.getElementById('clearBtn');
         // 抽签人数选择相关元素
         const drawCountSection = document.getElementById('drawCountSection');
         const drawCountInput = document.getElementById('drawCountInput');
@@ -864,20 +855,7 @@
             status.textContent = `成功导入 ${addedCount} 个名字！`;
         }
         
-        // 清空名字功能
-        function clearNames() {
-            if (confirm('确定要清空所有教练吗？此操作不可恢复！')) {
-                const password = prompt('请输入密码：');
-                if (password === '123456') {
-                    names = [];
-                    updateNameList();
-                    saveNames();
-                    status.textContent = '已清空所有教练！';
-                } else {
-                    status.textContent = '密码错误，清空失败！';
-                }
-            }
-        }
+
         
         // 页面切换函数
         function showPage(page) {
@@ -934,7 +912,6 @@
         
         // 添加导入事件监听
         importBtn.addEventListener('click', importNames);
-        clearBtn.addEventListener('click', clearNames);
         
         // 页面加载时更新列表
         updateNameList();
