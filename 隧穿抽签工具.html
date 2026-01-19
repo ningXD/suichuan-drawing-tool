@@ -409,9 +409,12 @@
         
         // 删除名字函数
         function deleteName(index) {
-            names.splice(index, 1);
-            updateNameList();
-            saveNames();
+            const nameToDelete = names[index];
+            if (confirm(`确定要删除名字 "${nameToDelete}" 吗？`)) {
+                names.splice(index, 1);
+                updateNameList();
+                saveNames();
+            }
         }
         
         // 保存名字到localStorage
