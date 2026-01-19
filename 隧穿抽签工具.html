@@ -909,8 +909,17 @@
             // 隐藏跳转按钮
             goToUpdateBtn.classList.add('hidden');
             
+            // 在更新教练页面重置全选按钮状态
+            if (page === updateCoachPage) {
+                status.style.display = 'block';
+                // 重置全选按钮为不勾选状态
+                const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+                if (selectAllCheckbox) {
+                    selectAllCheckbox.checked = false;
+                }
+            }
             // 在抽签页面重置状态
-            if (page === drawPage) {
+            else if (page === drawPage) {
                 status.style.display = 'block';
                 // 重置所有抽签相关元素
                 drawCountSection.style.display = 'block';
