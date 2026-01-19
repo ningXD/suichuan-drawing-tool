@@ -24,9 +24,11 @@
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            max-width: 600px;
-            width: 100%;
+            padding: 50px;
+            max-width: 800px;
+            width: 90%;
+            min-height: 600px;
+            position: relative;
         }
         
         h1 {
@@ -136,8 +138,8 @@
         /* 返回按钮样式 */
         .back-btn {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 15px;
+            left: 15px;
             padding: 10px 20px;
             background-color: #607d8b;
             color: white;
@@ -256,9 +258,6 @@
     </style>
 </head>
 <body>
-    <!-- 通用返回按钮 -->
-    <button id="backBtn" class="back-btn" style="display: none;">返回首页</button>
-    
     <!-- 首页 -->
     <div id="homePage" class="container page active">
         <h1>隧穿教练抽签工具</h1>
@@ -271,6 +270,8 @@
     
     <!-- 更新教练页面 -->
     <div id="updateCoachPage" class="container page" style="display: none;">
+        <!-- 返回按钮 -->
+        <button id="backBtn1" class="back-btn">返回首页</button>
         <h1>更新教练</h1>
         
         <div class="add-name">
@@ -295,6 +296,8 @@
     
     <!-- 准备抽签页面 -->
     <div id="drawPage" class="container page" style="display: none;">
+        <!-- 返回按钮 -->
+        <button id="backBtn2" class="back-btn">返回首页</button>
         <h1>隧穿教练抽签工具</h1>
         
         <div class="draw-area-simple">
@@ -322,7 +325,8 @@
         const exportBtn = document.getElementById('exportBtn');
         const clearBtn = document.getElementById('clearBtn');
         // 页面导航元素
-        const backBtn = document.getElementById('backBtn');
+        const backBtn1 = document.getElementById('backBtn1');
+        const backBtn2 = document.getElementById('backBtn2');
         const updateCoachBtn = document.getElementById('updateCoachBtn');
         const prepareDrawBtn = document.getElementById('prepareDrawBtn');
         // 页面容器
@@ -475,13 +479,6 @@
             
             // 显示指定页面
             page.style.display = 'block';
-            
-            // 显示/隐藏返回按钮
-            if (page === homePage) {
-                backBtn.style.display = 'none';
-            } else {
-                backBtn.style.display = 'block';
-            }
         }
         
         // 返回首页
@@ -490,7 +487,8 @@
         }
         
         // 页面导航事件监听
-        backBtn.addEventListener('click', goBackHome);
+        backBtn1.addEventListener('click', goBackHome);
+        backBtn2.addEventListener('click', goBackHome);
         updateCoachBtn.addEventListener('click', () => showPage(updateCoachPage));
         prepareDrawBtn.addEventListener('click', () => showPage(drawPage));
         
