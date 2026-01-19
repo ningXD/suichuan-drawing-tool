@@ -438,6 +438,8 @@
     <div id="updateCoachPage" class="container page" style="display: none;">
         <!-- 返回按钮 -->
         <button id="backBtn1" class="back-btn">返回首页</button>
+        <!-- 生成二维码按钮 -->
+        <button id="generateQrBtn" style="position: absolute; top: 15px; right: 15px; padding: 10px 20px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; z-index: 100;">生成二维码</button>
         <h1>更新教练</h1>
         
         <div class="name-list-container">
@@ -617,6 +619,9 @@
         
         // 更新名字列表
         function updateNameList() {
+            // 从localStorage重新读取数据，确保显示最新数据
+            names = JSON.parse(localStorage.getItem('drawingNames')) || [];
+            
             const nameListElement = document.getElementById('nameList');
             
             if (names.length === 0) {
@@ -973,5 +978,144 @@
         // 页面加载时更新列表
         updateNameList();
     </script>
-</body>
+
+<!-- 填写名字页面 -->
+<div id="fillNamePage" class="container page" style="display: none;">
+    <h1>填写你的名字</h1>
+    <div style="margin-top: 50px; text-align: center;">
+        <input type="text" id="fillNameInput" placeholder="请输入你的名字" style="width: 300px; height: 50px; padding: 10px; font-size: 18px; border: 2px solid #ddd; border-radius: 8px; text-align: center;">
+        <div style="margin-top: 20px;">
+            <button id="submitNameBtn" style="padding: 12px 30px; font-size: 18px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">提交名字</button>
+        </div>
+        <div id="fillNameStatus" style="margin-top: 20px; color: #4CAF50; font-weight: bold;"></div>
+    </div>
+</div>
+
+<!-- 二维码弹窗（简化版，直接显示URL） -->
+<div id="qrModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5);">
+    <div style="background-color: white; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 400px; text-align: center; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+        <h2>填写名字链接</h2>
+        <div style="margin: 20px 0; padding: 15px; background-color: #f5f5f5; border-radius: 5px; word-break: break-all;">
+            <p style="margin: 0; font-size: 16px;">复制以下链接到浏览器或手机中访问：</p>
+            <p id="fillNameUrl" style="margin: 10px 0; font-weight: bold; color: #2196F3;"></p>
+            <button id="copyUrlBtn" style="padding: 8px 15px; background-color: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 14px;">复制链接</button>
+        </div>
+        <p>通过该链接可以填写名字，自动添加到教练列表</p>
+        <button id="closeQrModal" style="padding: 10px 20px; background-color: #607d8b; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px;">关闭</button>
+    </div>
+</div>
+
+<!-- 二维码功能JavaScript -->
+<script>
+    // 二维码功能相关元素
+    const generateQrBtn = document.getElementById('generateQrBtn');
+    const qrModal = document.getElementById('qrModal');
+    const closeQrModal = document.getElementById('closeQrModal');
+    const fillNameUrl = document.getElementById('fillNameUrl');
+    const copyUrlBtn = document.getElementById('copyUrlBtn');
+    
+    // 填写名字页面元素
+    const fillNamePage = document.getElementById('fillNamePage');
+    const fillNameInput = document.getElementById('fillNameInput');
+    const submitNameBtn = document.getElementById('submitNameBtn');
+    const fillNameStatus = document.getElementById('fillNameStatus');
+    
+    // 生成二维码按钮点击事件（简化为显示URL）
+    generateQrBtn.addEventListener('click', () => {
+        // 生成填写名字页面的URL
+        const currentUrl = window.location.href;
+        const url = currentUrl.replace(/\.html$/, '.html?page=fillName');
+        
+        // 显示URL
+        fillNameUrl.textContent = url;
+        
+        // 显示弹窗
+        qrModal.style.display = 'block';
+    });
+    
+    // 关闭二维码弹窗
+    closeQrModal.addEventListener('click', () => {
+        qrModal.style.display = 'none';
+    });
+    
+    // 点击弹窗外部关闭
+    window.addEventListener('click', (event) => {
+        if (event.target === qrModal) {
+            qrModal.style.display = 'none';
+        }
+    });
+    
+    // 复制链接功能
+    copyUrlBtn.addEventListener('click', () => {
+        const url = fillNameUrl.textContent;
+        navigator.clipboard.writeText(url).then(() => {
+            copyUrlBtn.textContent = '已复制！';
+            setTimeout(() => {
+                copyUrlBtn.textContent = '复制链接';
+            }, 2000);
+        }).catch(err => {
+            console.error('复制失败:', err);
+            copyUrlBtn.textContent = '复制失败';
+        });
+    });
+    
+    // 处理URL参数，跳转到填写名字页面
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('page') === 'fillName') {
+        showPage(fillNamePage);
+    }
+    
+    // 提交名字按钮点击事件
+    submitNameBtn.addEventListener('click', () => {
+        const name = fillNameInput.value.trim();
+        if (!name) {
+            fillNameStatus.textContent = '请输入你的名字！';
+            fillNameStatus.style.color = '#f44336';
+            return;
+        }
+        
+        // 从localStorage获取现有名字
+        let existingNames = JSON.parse(localStorage.getItem('drawingNames')) || [];
+        
+        // 检查是否已存在相似名字
+        const hasSimilar = existingNames.some(existingName => {
+            return extractBaseName(existingName) === extractBaseName(name);
+        });
+        
+        // 生成唯一名字
+        let uniqueName = name;
+        if (hasSimilar) {
+            // 找到最大序号
+            let maxCounter = 0;
+            existingNames.forEach(existingName => {
+                if (extractBaseName(existingName) === extractBaseName(name)) {
+                    if (existingName === name) {
+                        maxCounter = Math.max(maxCounter, 1);
+                    } else {
+                        const counterStr = existingName.replace(extractBaseName(name), '');
+                        const counter = parseInt(counterStr);
+                        if (!isNaN(counter)) {
+                            maxCounter = Math.max(maxCounter, counter);
+                        }
+                    }
+                }
+            });
+            uniqueName = `${extractBaseName(name)}${maxCounter + 1}`;
+        }
+        
+        // 添加到现有名字数组
+        existingNames.push(uniqueName);
+        
+        // 保存到localStorage
+        localStorage.setItem('drawingNames', JSON.stringify(existingNames));
+        
+        // 显示成功信息
+        fillNameStatus.textContent = '名字提交成功！';
+        fillNameStatus.style.color = '#4CAF50';
+        fillNameInput.value = '';
+    });
+    
+
+</script>
+    </body>
 </html>
