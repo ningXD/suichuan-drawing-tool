@@ -73,12 +73,60 @@
             background-color: #45a049;
         }
         
-        .name-list {
-            background-color: #f9f9f9;
+        /* 名字列表容器 */
+        .name-list-container {
+            margin-bottom: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 列表操作栏样式 */
+        .name-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .header-left label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .header-left input[type="checkbox"] {
+            transform: scale(1.2);
+            cursor: pointer;
+        }
+        
+        /* 删除选中按钮样式 */
+        .delete-selected-btn {
+            padding: 8px 15px;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .delete-selected-btn:hover {
+            background-color: #d32f2f;
+        }
+        
+        .name-list {
+            background-color: #f9f9f9;
+            border: none; /* 移除边框，因为已经有外框 */
+            border-radius: 0; /* 移除圆角，与外框保持一致 */
+            padding: 0;
+            margin-bottom: 0;
             max-height: 200px;
             overflow-y: auto;
         }
@@ -89,18 +137,18 @@
             margin: 5px 0;
             border-radius: 3px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 10px;
         }
         
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 3px 8px;
+        .name-item input[type="checkbox"] {
+            transform: scale(1.2);
             cursor: pointer;
-            font-size: 12px;
+        }
+        
+        /* 删除按钮样式（保留但隐藏，因为我们将使用批量删除） */
+        .delete-btn {
+            display: none;
         }
         
         .draw-area {
@@ -371,8 +419,23 @@
             <button id="addBtn">添加教练</button>
         </div>
         
-        <div class="name-list" id="nameList">
-            <p style="color: #999;">暂无教练，请先添加</p>
+        <div class="name-list-container">
+            <!-- 操作栏 -->
+            <div class="name-list-header">
+                <div class="header-left">
+                    <label>
+                        <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()">
+                        全选
+                    </label>
+                </div>
+                <div class="header-right">
+                    <button id="deleteSelectedBtn" onclick="batchDeleteNames()" class="delete-selected-btn">删除</button>
+                </div>
+            </div>
+            <!-- 名字列表 -->
+            <div class="name-list" id="nameList">
+                <p style="color: #999;">暂无教练，请先添加</p>
+            </div>
         </div>
         
         <div style="margin-top: 20px;">
@@ -476,50 +539,121 @@
             }
         }
         
+        // 提取基础名字（去掉序号后缀）
+        function extractBaseName(name) {
+            // 从后往前查找连续的数字
+            let baseName = name;
+            let i = name.length - 1;
+            while (i >= 0 && /\d/.test(name[i])) {
+                i--;
+            }
+            // 如果找到了数字后缀，提取基础名字
+            if (i < name.length - 1) {
+                baseName = name.slice(0, i + 1);
+            }
+            return baseName;
+        }
+        
         // 检查是否存在同名（包括带有序号后缀的）
-        function hasSimilarName(baseName) {
-            // 正则表达式匹配同名（如 "王昊宁" 或 "王昊宁-2"）
-            const regex = new RegExp(`^${baseName}(-\d+)?$`);
-            return names.some(name => regex.test(name));
+        function hasSimilarName(name) {
+            // 提取基础名字
+            const baseName = extractBaseName(name);
+            
+            // 检查所有名字是否有相似的基础名字
+            return names.some(existingName => {
+                const existingBaseName = extractBaseName(existingName);
+                return existingBaseName === baseName;
+            });
         }
         
         // 生成唯一名字函数
-        function generateUniqueName(baseName) {
-            if (!names.includes(baseName)) {
-                return baseName;
+        function generateUniqueName(name) {
+            // 提取基础名字
+            const baseName = extractBaseName(name);
+            
+            // 检查所有名字，找到最大的序号
+            let maxCounter = 0;
+            
+            names.forEach(existingName => {
+                const existingBaseName = extractBaseName(existingName);
+                if (existingBaseName === baseName) {
+                    // 如果是基础名字本身，序号为1
+                    if (existingName === baseName) {
+                        maxCounter = Math.max(maxCounter, 1);
+                    } else {
+                        // 提取序号（从后往前查找连续数字）
+                        let i = existingName.length - 1;
+                        let counterStr = '';
+                        while (i >= 0 && /\d/.test(existingName[i])) {
+                            counterStr = existingName[i] + counterStr;
+                            i--;
+                        }
+                        const counter = parseInt(counterStr);
+                        if (!isNaN(counter)) {
+                            maxCounter = Math.max(maxCounter, counter);
+                        }
+                    }
+                }
+            });
+            
+            // 如果没有找到相似名字，返回原名字
+            if (maxCounter === 0) {
+                return name;
             }
             
-            let counter = 2;
-            let newName = `${baseName}-${counter}`;
-            while (names.includes(newName)) {
-                counter++;
-                newName = `${baseName}-${counter}`;
-            }
-            return newName;
+            // 生成新的唯一名字（xxx2格式）
+            return `${baseName}${maxCounter + 1}`;
         }
         
         // 更新名字列表
         function updateNameList() {
             if (names.length === 0) {
-                nameList.innerHTML = '<p style="color: #999;">暂无名字，请先添加</p>';
+                nameList.innerHTML = '<p style="color: #999;">暂无教练，请先添加</p>';
                 return;
             }
             
             const html = names.map((name, index) => `
                 <div class="name-item">
-                    <span>${name}</span>
-                    <button class="delete-btn" onclick="deleteName(${index})">删除</button>
+                    <input type="checkbox" id="name_${index}" class="name-checkbox">
+                    <label for="name_${index}">${name}</label>
                 </div>
             `).join('');
             
             nameList.innerHTML = html;
         }
         
-        // 删除名字函数
-        function deleteName(index) {
-            const nameToDelete = names[index];
-            if (confirm(`确定要删除名字 "${nameToDelete}" 吗？`)) {
-                names.splice(index, 1);
+        // 全选/取消全选功能
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const checkboxes = document.querySelectorAll('.name-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+        
+        // 批量删除名字函数
+        function batchDeleteNames() {
+            // 获取所有选中的复选框
+            const checkboxes = document.querySelectorAll('.name-checkbox:checked');
+            if (checkboxes.length === 0) {
+                alert('请先选择要删除的教练！');
+                return;
+            }
+            
+            if (confirm(`确定要删除选中的 ${checkboxes.length} 个教练吗？`)) {
+                // 获取选中的索引
+                const selectedIndices = Array.from(checkboxes).map(checkbox => {
+                    const id = checkbox.id;
+                    const index = parseInt(id.split('_')[1]);
+                    return index;
+                });
+                
+                // 按从大到小的顺序删除，避免索引偏移
+                selectedIndices.sort((a, b) => b - a).forEach(index => {
+                    names.splice(index, 1);
+                });
+                
+                // 更新列表和保存
                 updateNameList();
                 saveNames();
             }
@@ -704,7 +838,13 @@
             
             // 如果存在相似名字，显示确认对话框
             if (hasSimilar) {
-                if (!confirm(`检测到 ${similarNames.length} 个相似名字：${similarNames.join('、')}，是否继续导入？`)) {
+                // 计算每个相似名字的实际导入数量
+                const similarNameCounts = similarNames.map(name => {
+                    const count = importedNames.filter(n => n === name).length;
+                    return `${name}(${count}个)`;
+                });
+                
+                if (!confirm(`检测到 ${similarNames.length} 种相似名字，共 ${importedNames.length} 个名字：${similarNameCounts.join('、')}，是否继续导入？`)) {
                     return;
                 }
             }
