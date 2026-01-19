@@ -461,6 +461,12 @@
         function addName() {
             let name = nameInput.value.trim();
             if (name) {
+                // 检查是否存在同名（包括带有序号后缀的）
+                if (hasSimilarName(name)) {
+                    if (!confirm('名单里已经有相似的名字，是否继续添加？')) {
+                        return;
+                    }
+                }
                 // 生成唯一名字
                 const uniqueName = generateUniqueName(name);
                 names.push(uniqueName);
@@ -468,6 +474,13 @@
                 saveNames();
                 nameInput.value = '';
             }
+        }
+        
+        // 检查是否存在同名（包括带有序号后缀的）
+        function hasSimilarName(baseName) {
+            // 正则表达式匹配同名（如 "王昊宁" 或 "王昊宁-2"）
+            const regex = new RegExp(`^${baseName}(-\d+)?$`);
+            return names.some(name => regex.test(name));
         }
         
         // 生成唯一名字函数
@@ -675,6 +688,25 @@
             if (importedNames.length === 0) {
                 status.textContent = '没有有效的名字可以导入！';
                 return;
+            }
+            
+            // 检查是否存在相似名字
+            const baseNames = [...new Set(importedNames)]; // 去重
+            let hasSimilar = false;
+            const similarNames = [];
+            
+            baseNames.forEach(baseName => {
+                if (hasSimilarName(baseName)) {
+                    hasSimilar = true;
+                    similarNames.push(baseName);
+                }
+            });
+            
+            // 如果存在相似名字，显示确认对话框
+            if (hasSimilar) {
+                if (!confirm(`检测到 ${similarNames.length} 个相似名字：${similarNames.join('、')}，是否继续导入？`)) {
+                    return;
+                }
             }
             
             // 处理每个名字，生成唯一名字
