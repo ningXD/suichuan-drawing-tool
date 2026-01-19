@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隧穿抽签工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .add-name {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        #nameInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        #addBtn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        #addBtn:hover {
+            background-color: #45a049;
+        }
+        
+        .name-list {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .name-item {
+            background-color: #e8f5e8;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 3px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .draw-area {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        #result {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            min-height: 60px;
+        }
+        
+        #drawBtn {
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #drawBtn:hover {
+            background-color: #0b7dda;
+        }
+        
+        #drawBtn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            color: #666;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>隧穿抽签工具</h1>
+        
+        <div class="add-name">
+            <input type="text" id="nameInput" placeholder="请输入名字">
+            <button id="addBtn">添加名字</button>
+        </div>
+        
+        <div class="name-list" id="nameList">
+            <p style="color: #999;">暂无名字，请先添加</p>
+        </div>
+        
+        <div class="draw-area">
+            <div id="result">点击开始抽签</div>
+            <button id="drawBtn">开始抽签</button>
+            <div class="status" id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        // 存储名字的数组
+        let names = [];
+        let isDrawing = false;
+        let drawInterval = null;
+        
+        // 获取DOM元素
+        const nameInput = document.getElementById('nameInput');
+        const addBtn = document.getElementById('addBtn');
+        const nameList = document.getElementById('nameList');
+        const result = document.getElementById('result');
+        const drawBtn = document.getElementById('drawBtn');
+        const status = document.getElementById('status');
+        
+        // 添加名字函数
+        function addName() {
+            const name = nameInput.value.trim();
+            if (name) {
+                names.push(name);
+                updateNameList();
+                nameInput.value = '';
+            }
+        }
+        
+        // 更新名字列表
+        function updateNameList() {
+            if (names.length === 0) {
+                nameList.innerHTML = '<p style="color: #999;">暂无名字，请先添加</p>';
+                return;
+            }
+            
+            const html = names.map((name, index) => `
+                <div class="name-item">
+                    <span>${name}</span>
+                    <button class="delete-btn" onclick="deleteName(${index})">删除</button>
+                </div>
+            `).join('');
+            
+            nameList.innerHTML = html;
+        }
+        
+        // 删除名字函数
+        function deleteName(index) {
+            names.splice(index, 1);
+            updateNameList();
+        }
+        
+        // 开始抽签
+        function startDraw() {
+            if (names.length === 0) {
+                status.textContent = '请先添加名字！';
+                return;
+            }
+            
+            if (isDrawing) return;
+            
+            isDrawing = true;
+            drawBtn.disabled = true;
+            status.textContent = '正在抽签...';
+            
+            let count = 0;
+            const totalCount = 50; // 总共切换50次
+            const intervalTime = 100; // 每次切换间隔100ms
+            
+            // 开始快速切换名字
+            drawInterval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * names.length);
+                result.textContent = names[randomIndex];
+                count++;
+                
+                if (count >= totalCount) {
+                    clearInterval(drawInterval);
+                    isDrawing = false;
+                    drawBtn.disabled = false;
+                    status.textContent = '抽签完成！';
+                }
+            }, intervalTime);
+        }
+        
+        // 事件监听
+        addBtn.addEventListener('click', addName);
+        drawBtn.addEventListener('click', startDraw);
+        
+        // 回车键添加名字
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addName();
+            }
+        });
+    </script>
+</body>
+</html>
