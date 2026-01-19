@@ -345,6 +345,8 @@
     <script>
         // 存储名字的数组，从localStorage读取
         let names = JSON.parse(localStorage.getItem('drawingNames')) || [];
+        // 白名单数组，从localStorage读取
+        let whitelist = JSON.parse(localStorage.getItem('drawingWhitelist')) || [];
         let isDrawing = false;
         let drawInterval = null;
         
@@ -416,14 +418,17 @@
         
         // 开始抽签
         function startDraw() {
-            if (names.length === 0) {
-                status.textContent = '请先添加名字！';
+            // 过滤掉白名单人员
+            const availableNames = names.filter(name => !whitelist.includes(name));
+            
+            if (availableNames.length === 0) {
+                status.textContent = '没有可用的抽签人员！';
                 return;
             }
             
             // 当只有一个人时，提示确认
-            if (names.length === 1) {
-                if (!confirm('目前名单里只有一个人，确定抽签吗？')) {
+            if (availableNames.length === 1) {
+                if (!confirm('目前可用名单里只有一个人，确定抽签吗？')) {
                     return;
                 }
             }
@@ -445,8 +450,8 @@
             
             // 开始快速切换名字
             drawInterval = setInterval(() => {
-                const randomIndex = Math.floor(Math.random() * names.length);
-                result.textContent = names[randomIndex];
+                const randomIndex = Math.floor(Math.random() * availableNames.length);
+                result.textContent = availableNames[randomIndex];
                 count++;
                 
                 if (count >= totalCount) {
@@ -584,7 +589,7 @@
         importBtn.addEventListener('click', importNames);
         clearBtn.addEventListener('click', clearNames);
         
-        // 页面加载时更新名字列表和显示首页
+        // 页面加载时更新列表
         updateNameList();
     </script>
 </body>
