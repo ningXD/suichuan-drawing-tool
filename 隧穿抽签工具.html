@@ -133,6 +133,74 @@
             font-size: 14px;
         }
         
+        /* 返回按钮样式 */
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #607d8b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 100;
+        }
+        
+        .back-btn:hover {
+            background-color: #455a64;
+        }
+        
+        /* 首页主按钮样式 */
+        .main-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 50px;
+            align-items: center;
+        }
+        
+        .main-buttons button {
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 300px;
+        }
+        
+        #updateCoachBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        #updateCoachBtn:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        #prepareDrawBtn {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        #prepareDrawBtn:hover {
+            background-color: #0b7dda;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 简洁抽签区域样式 */
+        .draw-area-simple {
+            text-align: center;
+            margin: 50px 0;
+        }
+        
+        /* 批量操作按钮样式 */
         .import-export {
             display: flex;
             gap: 10px;
@@ -188,32 +256,51 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>隧穿抽签工具</h1>
+    <!-- 通用返回按钮 -->
+    <button id="backBtn" class="back-btn" style="display: none;">返回首页</button>
+    
+    <!-- 首页 -->
+    <div id="homePage" class="container page active">
+        <h1>隧穿教练抽签工具</h1>
+        
+        <div class="main-buttons">
+            <button id="updateCoachBtn">更新教练</button>
+            <button id="prepareDrawBtn">准备抽签</button>
+        </div>
+    </div>
+    
+    <!-- 更新教练页面 -->
+    <div id="updateCoachPage" class="container page" style="display: none;">
+        <h1>更新教练</h1>
         
         <div class="add-name">
-            <input type="text" id="nameInput" placeholder="请输入名字">
-            <button id="addBtn">添加名字</button>
+            <input type="text" id="nameInput" placeholder="请输入教练名字">
+            <button id="addBtn">添加教练</button>
         </div>
         
         <div class="name-list" id="nameList">
-            <p style="color: #999;">暂无名字，请先添加</p>
-        </div>
-        
-        <div class="draw-area">
-            <div id="result">点击开始抽签</div>
-            <button id="drawBtn">开始抽签</button>
-            <div class="status" id="status"></div>
+            <p style="color: #999;">暂无教练，请先添加</p>
         </div>
         
         <div style="margin-top: 20px;">
-            <h3>批量导入名字</h3>
-            <textarea id="importText" placeholder="请输入名字，每行一个"></textarea>
+            <h3>批量导入教练</h3>
+            <textarea id="importText" placeholder="请输入教练名字，每行一个"></textarea>
             <div class="import-export">
-                <button id="importBtn">导入名字</button>
-                <button id="exportBtn">导出名字</button>
-                <button id="clearBtn">清空名字</button>
+                <button id="importBtn">导入教练</button>
+                <button id="exportBtn">导出教练</button>
+                <button id="clearBtn">清空教练</button>
             </div>
+        </div>
+    </div>
+    
+    <!-- 准备抽签页面 -->
+    <div id="drawPage" class="container page" style="display: none;">
+        <h1>隧穿教练抽签工具</h1>
+        
+        <div class="draw-area-simple">
+            <div id="result">点击开始抽签</div>
+            <button id="drawBtn">开始抽签</button>
+            <div class="status" id="status"></div>
         </div>
     </div>
 
@@ -234,6 +321,14 @@
         const importBtn = document.getElementById('importBtn');
         const exportBtn = document.getElementById('exportBtn');
         const clearBtn = document.getElementById('clearBtn');
+        // 页面导航元素
+        const backBtn = document.getElementById('backBtn');
+        const updateCoachBtn = document.getElementById('updateCoachBtn');
+        const prepareDrawBtn = document.getElementById('prepareDrawBtn');
+        // 页面容器
+        const homePage = document.getElementById('homePage');
+        const updateCoachPage = document.getElementById('updateCoachPage');
+        const drawPage = document.getElementById('drawPage');
         
         // 添加名字函数
         function addName() {
@@ -371,12 +466,40 @@
             }
         }
         
+        // 页面切换函数
+        function showPage(page) {
+            // 隐藏所有页面
+            homePage.style.display = 'none';
+            updateCoachPage.style.display = 'none';
+            drawPage.style.display = 'none';
+            
+            // 显示指定页面
+            page.style.display = 'block';
+            
+            // 显示/隐藏返回按钮
+            if (page === homePage) {
+                backBtn.style.display = 'none';
+            } else {
+                backBtn.style.display = 'block';
+            }
+        }
+        
+        // 返回首页
+        function goBackHome() {
+            showPage(homePage);
+        }
+        
+        // 页面导航事件监听
+        backBtn.addEventListener('click', goBackHome);
+        updateCoachBtn.addEventListener('click', () => showPage(updateCoachPage));
+        prepareDrawBtn.addEventListener('click', () => showPage(drawPage));
+        
         // 添加导入导出事件监听
         importBtn.addEventListener('click', importNames);
         exportBtn.addEventListener('click', exportNames);
         clearBtn.addEventListener('click', clearNames);
         
-        // 页面加载时更新名字列表
+        // 页面加载时更新名字列表和显示首页
         updateNameList();
     </script>
 </body>
