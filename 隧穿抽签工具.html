@@ -640,6 +640,21 @@
                 return;
             }
             
+            // 检查是否是全选删除所有教练
+            const isDeleteAll = checkboxes.length === names.length;
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            
+            if (isDeleteAll || selectAllCheckbox.checked) {
+                // 全选删除所有教练时需要密码验证
+                // 更改删除权限密码
+                const deletePassword = '123456';
+                const password = prompt('删除所有教练需要密码验证，请输入密码：');
+                if (password !== deletePassword) {
+                    alert('密码错误，删除失败！');
+                    return;
+                }
+            }
+            
             if (confirm(`确定要删除选中的 ${checkboxes.length} 个教练吗？`)) {
                 // 获取选中的索引
                 const selectedIndices = Array.from(checkboxes).map(checkbox => {
