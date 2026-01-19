@@ -520,6 +520,11 @@
             // 在抽签页面隐藏状态信息容器
             if (page === drawPage) {
                 status.style.display = 'none';
+                // 重置抽签状态
+                drawBtn.className = '';
+                drawBtn.disabled = false;
+                result.className = '';
+                result.textContent = '点击开始抽签';
             } else {
                 status.style.display = 'block';
             }
