@@ -1042,11 +1042,63 @@
         document.body.style.overflow = 'auto';
     }
     
+    // ==============================
+    // 局域网访问配置区 - 自动检测
+    // ==============================
+    // 当你和手机在同一WiFi下时，系统会自动检测本地IP地址
+    // 无需手动配置，只需按照下方说明启动本地服务器即可
+    
+    // 本地服务器启动步骤（Windows）：
+    // 1. 确保你的电脑和手机连接到同一个WiFi网络
+    // 2. 打开命令提示符（Win+R 输入 cmd 回车）
+    // 3. 复制粘贴以下命令并回车：
+    //    cd /d D:\湃头\Trae项目\suichuan_drawingTool && python -m http.server 8080
+    // 4. 看到 "Serving HTTP on 0.0.0.0 port 8080 (http://0.0.0.0:8080/) ..." 表示服务器启动成功
+    // 5. 在电脑浏览器中访问：http://localhost:8080/html_version/隧穿抽签工具.html
+    // 6. 点击"生成二维码"按钮，手机扫描即可访问
+    
+    // 高级配置（如需手动设置）：
+    const MANUAL_SERVER_URL = ''; // 如需手动设置，格式：http://你的IP地址:8080/html_version
+    
+    // 自动检测本地IP地址
+    function getLocalServerUrl() {
+        // 如果手动设置了服务器地址，使用手动设置的
+        if (MANUAL_SERVER_URL) {
+            return MANUAL_SERVER_URL;
+        }
+        
+        // 从当前URL中提取服务器地址
+        const currentUrl = window.location.href;
+        
+        // 如果是通过服务器访问的（http或https协议），直接使用当前URL的基础部分
+        if (currentUrl.startsWith('http://') || currentUrl.startsWith('https://')) {
+            // 提取到html_version目录
+            const baseUrl = currentUrl.replace(/\/隧穿抽签工具\.html.*$/, '');
+            return baseUrl;
+        }
+        
+        // 否则返回空，表示使用当前URL（可能是file://协议）
+        return '';
+    }
+    
     // 生成二维码按钮点击事件
     generateQrBtn.addEventListener('click', () => {
-        // 生成填写名字页面的URL
-        const currentUrl = window.location.href;
-        const url = currentUrl.replace(/\.html$/, '.html?page=fillName');
+        let url;
+        const serverUrl = getLocalServerUrl();
+        
+        if (serverUrl) {
+            // 使用检测到的服务器地址
+            url = `${serverUrl}/隧穿抽签工具.html?page=fillName`;
+        } else {
+            // 使用当前URL（如果是file://协议，会提示用户启动服务器）
+            const currentUrl = window.location.href;
+            url = currentUrl.replace(/\.html$/, '.html?page=fillName');
+            
+            // 如果是file://协议，提示用户启动服务器
+            if (currentUrl.startsWith('file://')) {
+                alert('注意：当前使用的是本地文件协议，手机无法直接访问。\n请按照页面代码中的说明启动本地服务器，然后通过http://localhost:8080/html_version/隧穿抽签工具.html访问该页面。');
+            }
+        }
         
         // 显示URL
         fillNameUrl.textContent = url;
