@@ -212,6 +212,32 @@
             margin: 50px 0;
         }
         
+        /* 结果高亮样式 */
+        .result-highlight {
+            font-size: 64px;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+            animation: pulse 1s ease-in-out infinite alternate;
+        }
+        
+        /* 结果容器样式 */
+        .result-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        /* 动画效果 */
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        
+        /* 隐藏按钮 */
+        .hidden {
+            display: none;
+        }
+        
         /* 批量操作按钮样式 */
         .import-export {
             display: flex;
@@ -391,6 +417,11 @@
             
             if (isDrawing) return;
             
+            // 重置结果样式和显示
+            result.className = '';
+            result.innerHTML = '';
+            drawBtn.className = '';
+            
             isDrawing = true;
             drawBtn.disabled = true;
             status.textContent = '正在抽签...';
@@ -408,7 +439,17 @@
                 if (count >= totalCount) {
                     clearInterval(drawInterval);
                     isDrawing = false;
-                    drawBtn.disabled = false;
+                    
+                    // 隐藏开始按钮
+                    drawBtn.className = 'hidden';
+                    
+                    // 高亮显示结果
+                    result.className = 'result-highlight';
+                    
+                    // 添加emoji特效
+                    const resultText = result.textContent;
+                    result.innerHTML = `${resultText}<br><span style="font-size: 48px; margin-top: 20px; display: block;">🎉🌸🎊</span>`;
+                    
                     status.textContent = '抽签完成！';
                 }
             }, intervalTime);
