@@ -372,6 +372,12 @@
         function addName() {
             const name = nameInput.value.trim();
             if (name) {
+                // 检查名字是否已存在
+                if (names.includes(name)) {
+                    if (!confirm('名单里已经有这个人，是否继续添加？')) {
+                        return;
+                    }
+                }
                 names.push(name);
                 updateNameList();
                 saveNames();
@@ -413,6 +419,13 @@
             if (names.length === 0) {
                 status.textContent = '请先添加名字！';
                 return;
+            }
+            
+            // 当只有一个人时，提示确认
+            if (names.length === 1) {
+                if (!confirm('目前名单里只有一个人，确定抽签吗？')) {
+                    return;
+                }
             }
             
             if (isDrawing) return;
@@ -480,13 +493,39 @@
                 return;
             }
             
-            // 合并名字，去重
-            const allNames = [...new Set([...names, ...importedNames])];
-            names = allNames;
+            // 处理重复名字
+            const newNames = [];
+            const duplicateNames = [];
+            
+            importedNames.forEach(name => {
+                if (names.includes(name) || newNames.includes(name)) {
+                    duplicateNames.push(name);
+                } else {
+                    newNames.push(name);
+                }
+            });
+            
+            // 先添加不重复的名字
+            let addedCount = 0;
+            if (newNames.length > 0) {
+                names = [...names, ...newNames];
+                addedCount += newNames.length;
+            }
+            
+            // 处理重复名字
+            if (duplicateNames.length > 0) {
+                const uniqueDuplicates = [...new Set(duplicateNames)];
+                if (confirm(`检测到 ${uniqueDuplicates.length} 个重复名字：${uniqueDuplicates.join('、')}，是否继续添加？`)) {
+                    names = [...names, ...duplicateNames];
+                    addedCount += duplicateNames.length;
+                }
+            }
+            
+            // 更新列表和保存
             updateNameList();
             saveNames();
             importText.value = '';
-            status.textContent = `成功导入 ${importedNames.length} 个名字！`;
+            status.textContent = `成功导入 ${addedCount} 个名字！`;
         }
         
         // 清空名字功能
