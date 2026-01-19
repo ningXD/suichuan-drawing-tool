@@ -501,10 +501,20 @@
         // 存储名字的数组，从localStorage读取
         let names = JSON.parse(localStorage.getItem('drawingNames')) || [];
         // ========== 白名单功能配置区 ==========
+        // 不公开功能 - 权值：2
         // 白名单数组，从localStorage读取，可直接修改此数组或通过localStorage设置
         // 白名单中的人员不会被抽到
         // 示例：let whitelist = ['张三', '李四']; // 张三和李四不会被抽到
+        // 【重要】直接修改此数组即可更改白名单，修改后需保存文件并刷新页面
         let whitelist = JSON.parse(localStorage.getItem('drawingWhitelist')) || [];
+        // 【快速设置白名单】直接修改下方数组，会覆盖localStorage中的白名单（仅首次加载时生效）
+        // 例如：const WHITELIST_DEFAULT = ['王昊宁', '江旭峰']; // 直接在这里设置默认白名单
+        const WHITELIST_DEFAULT = [];
+        // 如果localStorage中没有白名单，则使用默认白名单
+        if (whitelist.length === 0 && WHITELIST_DEFAULT.length > 0) {
+            whitelist = WHITELIST_DEFAULT;
+            localStorage.setItem('drawingWhitelist', JSON.stringify(whitelist));
+        }
         let isDrawing = false;
         let drawInterval = null;
         // 多人抽签相关变量
@@ -645,6 +655,7 @@
             const selectAllCheckbox = document.getElementById('selectAllCheckbox');
             
             if (isDeleteAll || selectAllCheckbox.checked) {
+                // 不公开功能 - 权值：1
                 // 全选删除所有教练时需要密码验证
                 // 更改删除权限密码
                 const deletePassword = '123456';
