@@ -345,7 +345,10 @@
     <script>
         // 存储名字的数组，从localStorage读取
         let names = JSON.parse(localStorage.getItem('drawingNames')) || [];
-        // 白名单数组，从localStorage读取
+        // ========== 白名单功能配置区 ==========
+        // 白名单数组，从localStorage读取，可直接修改此数组或通过localStorage设置
+        // 白名单中的人员不会被抽到
+        // 示例：let whitelist = ['张三', '李四']; // 张三和李四不会被抽到
         let whitelist = JSON.parse(localStorage.getItem('drawingWhitelist')) || [];
         let isDrawing = false;
         let drawInterval = null;
