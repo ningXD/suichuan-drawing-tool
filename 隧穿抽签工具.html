@@ -132,6 +132,59 @@
             margin-top: 10px;
             font-size: 14px;
         }
+        
+        .import-export {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .import-export button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        #importBtn {
+            background-color: #ff9800;
+            color: white;
+        }
+        
+        #importBtn:hover {
+            background-color: #f57c00;
+        }
+        
+        #exportBtn {
+            background-color: #9c27b0;
+            color: white;
+        }
+        
+        #exportBtn:hover {
+            background-color: #7b1fa2;
+        }
+        
+        #clearBtn {
+            background-color: #607d8b;
+            color: white;
+        }
+        
+        #clearBtn:hover {
+            background-color: #455a64;
+        }
+        
+        #importText {
+            width: 100%;
+            min-height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -152,11 +205,21 @@
             <button id="drawBtn">开始抽签</button>
             <div class="status" id="status"></div>
         </div>
+        
+        <div style="margin-top: 20px;">
+            <h3>批量导入名字</h3>
+            <textarea id="importText" placeholder="请输入名字，每行一个"></textarea>
+            <div class="import-export">
+                <button id="importBtn">导入名字</button>
+                <button id="exportBtn">导出名字</button>
+                <button id="clearBtn">清空名字</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 存储名字的数组
-        let names = [];
+        // 存储名字的数组，从localStorage读取
+        let names = JSON.parse(localStorage.getItem('drawingNames')) || [];
         let isDrawing = false;
         let drawInterval = null;
         
@@ -167,6 +230,10 @@
         const result = document.getElementById('result');
         const drawBtn = document.getElementById('drawBtn');
         const status = document.getElementById('status');
+        const importText = document.getElementById('importText');
+        const importBtn = document.getElementById('importBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const clearBtn = document.getElementById('clearBtn');
         
         // 添加名字函数
         function addName() {
@@ -174,6 +241,7 @@
             if (name) {
                 names.push(name);
                 updateNameList();
+                saveNames();
                 nameInput.value = '';
             }
         }
@@ -199,6 +267,12 @@
         function deleteName(index) {
             names.splice(index, 1);
             updateNameList();
+            saveNames();
+        }
+        
+        // 保存名字到localStorage
+        function saveNames() {
+            localStorage.setItem('drawingNames', JSON.stringify(names));
         }
         
         // 开始抽签
@@ -243,6 +317,67 @@
                 addName();
             }
         });
+        
+        // 导入名字功能
+        function importNames() {
+            const text = importText.value.trim();
+            if (!text) {
+                status.textContent = '请输入要导入的名字！';
+                return;
+            }
+            
+            const importedNames = text.split('\n').map(name => name.trim()).filter(name => name);
+            if (importedNames.length === 0) {
+                status.textContent = '没有有效的名字可以导入！';
+                return;
+            }
+            
+            // 合并名字，去重
+            const allNames = [...new Set([...names, ...importedNames])];
+            names = allNames;
+            updateNameList();
+            saveNames();
+            importText.value = '';
+            status.textContent = `成功导入 ${importedNames.length} 个名字！`;
+        }
+        
+        // 导出名字功能
+        function exportNames() {
+            if (names.length === 0) {
+                status.textContent = '没有名字可以导出！';
+                return;
+            }
+            
+            const text = names.join('\n');
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '抽签名单.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            status.textContent = `成功导出 ${names.length} 个名字！`;
+        }
+        
+        // 清空名字功能
+        function clearNames() {
+            if (confirm('确定要清空所有名字吗？此操作不可恢复！')) {
+                names = [];
+                updateNameList();
+                saveNames();
+                status.textContent = '已清空所有名字！';
+            }
+        }
+        
+        // 添加导入导出事件监听
+        importBtn.addEventListener('click', importNames);
+        exportBtn.addEventListener('click', exportNames);
+        clearBtn.addEventListener('click', clearNames);
+        
+        // 页面加载时更新名字列表
+        updateNameList();
     </script>
 </body>
 </html>
