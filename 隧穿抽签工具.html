@@ -532,6 +532,7 @@
             drawCountSection.style.display = 'none';
             result.style.display = 'block';
             drawBtn.style.display = 'block';
+            drawBtn.disabled = false; // 启用开始抽签按钮
             drawnList.style.display = 'block';
             
             // 重置结果显示
@@ -724,6 +725,7 @@
                 drawCountSection.style.display = 'block';
                 result.style.display = 'none';
                 drawBtn.style.display = 'none';
+                drawBtn.disabled = false; // 确保按钮是启用状态
                 drawnList.style.display = 'none';
                 drawCountInput.value = '';
                 
