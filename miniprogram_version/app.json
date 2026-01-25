@@ -1,9 +1,9 @@
 {
   "pages": [
-    "new_pages/new_index/new_index",
-    "new_pages/new_updateCoach/new_updateCoach",
-    "new_pages/new_fillName/new_fillName",
-    "new_pages/new_draw/new_draw"
+    "pages/index/index",
+    "pages/updateCoach/updateCoach",
+    "pages/fillName/fillName",
+    "pages/draw/draw"
   ],
   "window": {
     "backgroundTextStyle": "light",
