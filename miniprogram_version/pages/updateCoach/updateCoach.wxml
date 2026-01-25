@@ -35,10 +35,10 @@
     <h3>输入名称导入教练（可批量）</h3>
     <textarea 
       class="textarea" 
-      placeholder="请输入教练名字，每行一个，通过回车enter键换行" 
+      placeholder="请输入教练姓名，每行一个" 
       value="{{importText}}"
       bindinput="onImportTextChange"
-      style="min-height: 150px; font-size: 16px;"
+      style="min-height: 150px; font-size: 16px; text-align: center;"
     ></textarea>
     <view class="batch-operations">
       <button class="btn btn-primary" bindtap="importNames">导入教练</button>

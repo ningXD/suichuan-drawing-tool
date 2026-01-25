@@ -110,6 +110,12 @@ h3 {
   resize: vertical;
 }
 
+/* 确保textarea的placeholder也居中显示 */
+.textarea::placeholder {
+  text-align: center;
+  opacity: 0.7;
+}
+
 .empty-message {
   text-align: center;
   color: #999;
