@@ -177,16 +177,24 @@ h3 {
   background-color: white;
   padding: 20px;
   border-radius: 10px;
-  width: 80%;
-  max-width: 400px;
+  width: 85%;
+  max-width: 420px;
   text-align: center;
 }
 
 .modal-input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 15px;
   margin: 20px 0;
   border: 2px solid #ddd;
   border-radius: 5px;
   font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* 修复placeholder显示问题 */
+.modal-input::placeholder {
+  font-size: 15px;
+  text-align: center;
+  opacity: 0.7;
 }
