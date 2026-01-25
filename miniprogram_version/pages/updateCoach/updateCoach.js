@@ -165,7 +165,7 @@ Page({
   // 生成二维码
   generateQRCode() {
     // 获取当前页面路径生成二维码
-    const pagePath = '/new_pages/new_fillName/new_fillName'
+    const pagePath = '/pages/fillName/fillName'
     
     // 使用微信API生成二维码
     wx.showLoading({ title: '生成二维码中...' })
