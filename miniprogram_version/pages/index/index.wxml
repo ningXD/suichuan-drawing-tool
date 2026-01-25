@@ -1,6 +1,6 @@
 <!-- 新首页 -->
 <view class="container page">
-  <h1>新隧穿教练抽签工具</h1>
+  <h1>抽签工具</h1>
   
   <view class="main-buttons" style="margin-top: 50px;">
     <button class="btn btn-primary" bindtap="goToUpdateCoach" style="padding: 25px 50px; font-size: 28px; margin: 20px 0;">更新教练</button>
