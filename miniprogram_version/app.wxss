@@ -1,5 +1,4 @@
-/* 新的小程序全局样式 */
-* {
+view, text, button, input, textarea, image, navigator, swiper, swiper-item, scroll-view, picker, picker-view, checkbox, radio, slider, switch, form, label, icon, progress, canvas {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -35,7 +34,6 @@ h3 {
   font-size: 20px;
 }
 
-/* 按钮样式 */
 .btn {
   padding: 10px 20px;
   border: none;
@@ -65,7 +63,6 @@ h3 {
   color: white;
 }
 
-/* 输入框样式 */
 .input {
   padding: 10px;
   border: 2px solid #ddd;
@@ -75,7 +72,6 @@ h3 {
   width: 100%;
 }
 
-/* 列表样式 */
 .list-container {
   margin: 20px 0;
   border: 1px solid #ddd;
@@ -103,7 +99,6 @@ h3 {
   gap: 10px;
 }
 
-/* 文本域样式 */
 .textarea {
   width: 100%;
   min-height: 150px;
@@ -115,14 +110,12 @@ h3 {
   resize: vertical;
 }
 
-/* 空状态样式 */
 .empty-message {
   text-align: center;
   color: #999;
   padding: 20px;
 }
 
-/* 全选样式 */
 .select-all {
   display: flex;
   align-items: center;
@@ -131,7 +124,6 @@ h3 {
   font-weight: bold;
 }
 
-/* 批量操作样式 */
 .batch-operations {
   display: flex;
   gap: 10px;
@@ -139,7 +131,6 @@ h3 {
   justify-content: center;
 }
 
-/* 二维码样式 */
 .qr-code-container {
   display: flex;
   flex-direction: column;
@@ -154,7 +145,6 @@ h3 {
   margin: 20px 0;
 }
 
-/* 抽签结果样式 */
 .result-container {
   display: flex;
   flex-direction: column;
@@ -170,7 +160,6 @@ h3 {
   margin: 20px 0;
 }
 
-/* 弹窗样式 */
 .modal {
   position: fixed;
   z-index: 1000;
